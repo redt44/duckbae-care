@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>덕배 돌봄 일지 🐱</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        gowun: ['"Gowun Dodum"', 'sans-serif'],
+                        sans: ['"Noto Sans KR"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .font-gowun {
+            font-family: 'Gowun Dodum', sans-serif;
+        }
+        .btn-press {
+            transition: transform 0.1s ease, opacity 0.1s ease;
+        }
+        .btn-press:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-16">
+    <div id="app" class="max-w-md mx-auto px-4 pt-6">
+        
+        <!-- Minimal Header -->
+        <header class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80 mb-4">
+            <div class="flex items-center justify-between mb-3">
+                <h1 class="text-xl font-bold font-gowun text-slate-800 flex items-center gap-2">
+                    덕배 돌봄 일지 🐾
+                </h1>
+                <div id="connection-status" class="flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 px-2.5 py-1 rounded-full">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>동기화 완료</span>
+                </div>
+            </div>
+
+            <!-- Sleek User Toggle Switcher -->
+            <div class="bg-slate-100 p-1 rounded-xl flex items-center gap-1 text-xs font-semibold">
+                <button id="btn-user-dahye" onclick="selectUser('다혜')" class="flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm bg-white text-rose-600 font-bold border border-slate-200">
+                    <span>👩‍🦰</span> 다혜
+                </button>
+                <button id="btn-user-daejoon" onclick="selectUser('대준')" class="flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-slate-500 hover:text-slate-800">
+                    <span>👨‍🦱</span> 대준
+                </button>
+            </div>
+        </header>
+
+        <!-- Clean Status Cards -->
+        <section class="grid grid-cols-3 gap-2 mb-4">
+            <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm text-center">
+                <div class="text-xs text-amber-600 font-medium mb-1">🍚 마지막 밥</div>
+                <div id="status-feed-time" class="text-xs font-bold text-slate-800 truncate">기록 없음</div>
+                <div id="status-feed-user" class="text-[10px] text-slate-400 mt-0.5 truncate">-</div>
+            </div>
+
+            <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm text-center">
+                <div class="text-xs text-sky-600 font-medium mb-1">🥛 마지막 물</div>
+                <div id="status-water-time" class="text-xs font-bold text-slate-800 truncate">기록 없음</div>
+                <div id="status-water-user" class="text-[10px] text-slate-400 mt-0.5 truncate">-</div>
+            </div>
+
+            <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-sm text-center">
+                <div class="text-xs text-emerald-600 font-medium mb-1">🧹 마지막 청소</div>
+                <div id="status-litter-time" class="text-xs font-bold text-slate-800 truncate">기록 없음</div>
+                <div id="status-litter-user" class="text-[10px] text-slate-400 mt-0.5 truncate">-</div>
+            </div>
+        </section>
+
+        <!-- Clean Action Buttons -->
+        <section class="mb-5 space-y-2.5">
+            <div class="flex items-center justify-between text-xs text-slate-500 px-1 font-medium">
+                <span>버튼을 눌러 바로 기록</span>
+                <span id="active-user-badge" class="text-rose-500 font-semibold">작성자: 다혜</span>
+            </div>
+
+            <button onclick="handleQuickAdd('밥주기')" class="btn-press w-full bg-amber-500 hover:bg-amber-600 text-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🍚</span>
+                    <span class="font-bold text-base">밥주기 완료</span>
+                </div>
+                <span class="text-xs bg-white/20 px-2.5 py-1 rounded-lg font-medium">기록 +</span>
+            </button>
+
+            <button onclick="handleQuickAdd('물주기')" class="btn-press w-full bg-sky-500 hover:bg-sky-600 text-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🥛</span>
+                    <span class="font-bold text-base">물 주기 완료</span>
+                </div>
+                <span class="text-xs bg-white/20 px-2.5 py-1 rounded-lg font-medium">기록 +</span>
+            </button>
+
+            <button onclick="handleQuickAdd('화장실청소')" class="btn-press w-full bg-emerald-600 hover:bg-emerald-700 text-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">🧹</span>
+                    <span class="font-bold text-base">화장실 청소 완료</span>
+                </div>
+                <span class="text-xs bg-white/20 px-2.5 py-1 rounded-lg font-medium">기록 +</span>
+            </button>
+        </section>
+
+        <!-- Simplified History Section -->
+        <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200/80">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-1.5">
+                    <i class="fa-regular fa-calendar-check text-slate-400"></i> 돌봄 기록
+                </h3>
+                <span id="total-count-badge" class="text-xs text-slate-500">총 0건</span>
+            </div>
+
+            <!-- Category Filter Pills -->
+            <div class="flex items-center gap-1 mb-3 text-xs border-b border-slate-100 pb-2">
+                <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1 rounded-lg font-medium bg-slate-800 text-white">전체</button>
+                <button onclick="setFilter('밥주기')" id="filter-feed" class="px-3 py-1 rounded-lg font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">🍚 밥</button>
+                <button onclick="setFilter('물주기')" id="filter-water" class="px-3 py-1 rounded-lg font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">🥛 물</button>
+                <button onclick="setFilter('화장실청소')" id="filter-litter" class="px-3 py-1 rounded-lg font-medium bg-slate-100 text-slate-600 hover:bg-slate-200">🧹 화장실</button>
+            </div>
+
+            <!-- History List Container -->
+            <div id="history-container" class="space-y-2 min-h-[120px]">
+                <div class="text-center py-8 text-slate-400 text-xs">
+                    <i class="fa-solid fa-spinner fa-spin text-lg mb-1"></i>
+                    <p>기록을 불러오는 중...</p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Edit Modal -->
+    <div id="edit-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl">
+            <div class="flex items-center justify-between mb-3">
+                <h4 class="font-bold text-slate-800 text-base">기록 수정하기</h4>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="edit-form" onsubmit="handleSaveEdit(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="edit-id">
+
+                <div>
+                    <label class="block text-slate-500 font-medium mb-1">항목</label>
+                    <select id="edit-type" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-medium">
+                        <option value="밥주기">🍚 밥주기 완료</option>
+                        <option value="물주기">🥛 물 주기 완료</option>
+                        <option value="화장실청소">🧹 화장실 청소 완료</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 font-medium mb-1">작성자</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <label class="flex items-center justify-center p-2 rounded-xl border border-slate-200 cursor-pointer font-medium has-[:checked]:bg-rose-50 has-[:checked]:border-rose-300 has-[:checked]:text-rose-600">
+                            <input type="radio" name="edit-user" value="다혜" class="hidden">
+                            <span>👩‍🦰 다혜</span>
+                        </label>
+                        <label class="flex items-center justify-center p-2 rounded-xl border border-slate-200 cursor-pointer font-medium has-[:checked]:bg-sky-50 has-[:checked]:border-sky-300 has-[:checked]:text-sky-600">
+                            <input type="radio" name="edit-user" value="대준" class="hidden">
+                            <span>👨‍🦱 대준</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 font-medium mb-1">시간</label>
+                    <input type="datetime-local" id="edit-datetime" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs font-medium">
+                </div>
+
+                <div>
+                    <label class="block text-slate-500 font-medium mb-1">메모 (선택)</label>
+                    <input type="text" id="edit-note" placeholder="예: 습식 사료, 전체 모래갈이 등" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-xs">
+                </div>
+
+                <div class="flex items-center gap-2 pt-2">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 py-2.5 text-slate-600 bg-slate-100 rounded-xl font-medium">
+                        취소
+                    </button>
+                    <button type="submit" class="flex-1 py-2.5 text-white bg-slate-800 rounded-xl font-medium">
+                        저장
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Prominent Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-xs w-full p-5 shadow-xl text-center">
+            <div class="w-10 h-10 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-2 text-lg">
+                <i class="fa-solid fa-trash-can"></i>
+            </div>
+            <h4 class="font-bold text-slate-800 text-base mb-1">기록 삭제</h4>
+            <p class="text-xs text-slate-500 mb-4">이 기록을 정말 삭제하시겠습니까?</p>
+            
+            <input type="hidden" id="delete-id">
+            
+            <div class="flex items-center gap-2">
+                <button onclick="closeDeleteModal()" class="flex-1 py-2.5 text-xs font-medium text-slate-600 bg-slate-100 rounded-xl">
+                    취소
+                </button>
+                <button onclick="confirmDeleteLog()" class="flex-1 py-2.5 text-xs font-semibold text-white bg-rose-500 hover:bg-rose-600 rounded-xl shadow-sm">
+                    삭제하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 pointer-events-none w-full max-w-xs px-4"></div>
+
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getFirestore, 
+            collection, 
+            addDoc, 
+            updateDoc, 
+            deleteDoc, 
+            doc, 
+            onSnapshot 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Dahye's Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAwELJakkCa9LGefy2FcWDAGQSMe2xxG-U",
+            authDomain: "duckbae-care.firebaseapp.com",
+            projectId: "duckbae-care",
+            storageBucket: "duckbae-care.firebasestorage.app",
+            messagingSenderId: "752592207506",
+            appId: "1:752592207506:web:bd4d4009ca5ec940afb04b"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State Management
+        window.state = {
+            currentUser: '다혜',
+            logs: [],
+            filter: 'all',
+            pendingType: null
+        };
+
+        // Realtime Listener Setup
+        function setupRealtimeListener() {
+            const logsCollection = collection(db, 'duckbae_care_logs');
+
+            onSnapshot(logsCollection, (snapshot) => {
+                const logsData = [];
+                snapshot.forEach((documentDoc) => {
+                    logsData.push({
+                        id: documentDoc.id,
+                        ...documentDoc.data()
+                    });
+                });
+
+                logsData.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+                window.state.logs = logsData;
+                renderUI();
+                
+                const statusEl = document.getElementById('connection-status');
+                if (statusEl) {
+                    statusEl.className = "flex items-center gap-1.5 text-xs text-emerald-600 font-medium bg-emerald-50 px-2.5 py-1 rounded-full";
+                    statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span><span>동기화 완료</span>`;
+                }
+            }, (error) => {
+                console.error("Firestore error:", error);
+                const statusEl = document.getElementById('connection-status');
+                if (statusEl) {
+                    statusEl.className = "flex items-center gap-1.5 text-xs text-amber-600 font-medium bg-amber-50 px-2.5 py-1 rounded-full";
+                    statusEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>연결 확인</span>`;
+                }
+            });
+        }
+
+        // Add Log Entry
+        window.addCareLog = async function(type, note = '') {
+            try {
+                const now = new Date();
+                const newEntry = {
+                    type: type,
+                    userName: window.state.currentUser,
+                    timestamp: now.getTime(),
+                    dateStr: now.toISOString(),
+                    note: note.trim()
+                };
+
+                const logsCollection = collection(db, 'duckbae_care_logs');
+                await addDoc(logsCollection, newEntry);
+                showToast(`${type} 완료! (${window.state.currentUser})`, 'success');
+            } catch (error) {
+                console.error("Error adding document:", error);
+                showToast("기록 저장 실패", "error");
+            }
+        };
+
+        // Update Log Entry
+        window.updateCareLog = async function(id, updatedData) {
+            try {
+                const logDocRef = doc(db, 'duckbae_care_logs', id);
+                await updateDoc(logDocRef, updatedData);
+                showToast("기록이 수정되었습니다.", "success");
+            } catch (error) {
+                console.error("Error updating document:", error);
+                showToast("수정 실패", "error");
+            }
+        };
+
+        // Delete Log Entry
+        window.deleteCareLog = async function(id) {
+            try {
+                const logDocRef = doc(db, 'duckbae_care_logs', id);
+                await deleteDoc(logDocRef);
+                showToast("기록이 삭제되었습니다.", "info");
+            } catch (error) {
+                console.error("Error deleting document:", error);
+                showToast("삭제 실패", "error");
+            }
+        };
+
+        // Initialize Realtime Listener Directly
+        setupRealtimeListener();
+    </script>
+
+    <!-- UI Logic & Interaction Handlers -->
+    <script>
+        function selectUser(userName) {
+            window.state.currentUser = userName;
+            const dahyeBtn = document.getElementById('btn-user-dahye');
+            const daejoonBtn = document.getElementById('btn-user-daejoon');
+            const badge = document.getElementById('active-user-badge');
+
+            if (userName === '다혜') {
+                dahyeBtn.className = "flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm bg-white text-rose-600 font-bold border border-slate-200";
+                daejoonBtn.className = "flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-slate-500 hover:text-slate-800";
+                badge.innerText = "작성자: 다혜 👩‍🦰";
+                badge.className = "text-rose-500 font-semibold";
+            } else {
+                daejoonBtn.className = "flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-sm bg-white text-sky-600 font-bold border border-slate-200";
+                dahyeBtn.className = "flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all text-slate-500 hover:text-slate-800";
+                badge.innerText = "작성자: 대준 👨‍🦱";
+                badge.className = "text-sky-600 font-semibold";
+            }
+        }
+
+        function handleQuickAdd(type) {
+            if (window.addCareLog) {
+                window.addCareLog(type, '');
+            }
+        }
+
+        function setFilter(type) {
+            window.state.filter = type;
+            
+            const btnAll = document.getElementById('filter-all');
+            const btnFeed = document.getElementById('filter-feed');
+            const btnWater = document.getElementById('filter-water');
+            const btnLitter = document.getElementById('filter-litter');
+
+            const activeClass = "px-3 py-1 rounded-lg font-medium bg-slate-800 text-white";
+            const inactiveClass = "px-3 py-1 rounded-lg font-medium bg-slate-100 text-slate-600 hover:bg-slate-200";
+
+            btnAll.className = type === 'all' ? activeClass : inactiveClass;
+            btnFeed.className = type === '밥주기' ? activeClass : inactiveClass;
+            btnWater.className = type === '물주기' ? activeClass : inactiveClass;
+            btnLitter.className = type === '화장실청소' ? activeClass : inactiveClass;
+
+            renderUI();
+        }
+
+        function formatTimeAgo(timestamp) {
+            if (!timestamp) return '기록 없음';
+            const now = new Date().getTime();
+            const diffSeconds = Math.floor((now - timestamp) / 1000);
+
+            if (diffSeconds < 60) return '방금 전';
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            if (diffMinutes < 60) return `${diffMinutes}분 전`;
+            const diffHours = Math.floor(diffMinutes / 60);
+            if (diffHours < 24) return `${diffHours}시간 전`;
+            const diffDays = Math.floor(diffHours / 24);
+            if (diffDays < 7) return `${diffDays}일 전`;
+
+            const date = new Date(timestamp);
+            return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+        }
+
+        function formatFullDateTime(timestamp) {
+            if (!timestamp) return '';
+            const d = new Date(timestamp);
+            const month = d.getMonth() + 1;
+            const date = d.getDate();
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const day = dayNames[d.getDay()];
+            let hours = d.getHours();
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? '오후' : '오전';
+            hours = hours % 12 || 12;
+
+            return `${month}/${date}(${day}) ${ampm} ${hours}:${minutes}`;
+        }
+
+        function toDatetimeLocalString(timestamp) {
+            const date = timestamp ? new Date(timestamp) : new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function renderUI() {
+            const logs = window.state.logs || [];
+
+            const latestFeed = logs.find(l => l.type === '밥주기');
+            const latestWater = logs.find(l => l.type === '물주기');
+            const latestLitter = logs.find(l => l.type === '화장실청소');
+
+            // Header summary cards
+            if (latestFeed) {
+                document.getElementById('status-feed-time').innerText = formatTimeAgo(latestFeed.timestamp);
+                document.getElementById('status-feed-user').innerText = `${latestFeed.userName}`;
+            } else {
+                document.getElementById('status-feed-time').innerText = '기록 없음';
+                document.getElementById('status-feed-user').innerText = '-';
+            }
+
+            if (latestWater) {
+                document.getElementById('status-water-time').innerText = formatTimeAgo(latestWater.timestamp);
+                document.getElementById('status-water-user').innerText = `${latestWater.userName}`;
+            } else {
+                document.getElementById('status-water-time').innerText = '기록 없음';
+                document.getElementById('status-water-user').innerText = '-';
+            }
+
+            if (latestLitter) {
+                document.getElementById('status-litter-time').innerText = formatTimeAgo(latestLitter.timestamp);
+                document.getElementById('status-litter-user').innerText = `${latestLitter.userName}`;
+            } else {
+                document.getElementById('status-litter-time').innerText = '기록 없음';
+                document.getElementById('status-litter-user').innerText = '-';
+            }
+
+            const filteredLogs = window.state.filter === 'all' 
+                ? logs 
+                : logs.filter(l => l.type === window.state.filter);
+
+            document.getElementById('total-count-badge').innerText = `총 ${filteredLogs.length}건`;
+
+            const container = document.getElementById('history-container');
+
+            if (filteredLogs.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-6 text-slate-400 text-xs">
+                        <p>아직 등록된 돌봄 기록이 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredLogs.map(log => {
+                let icon = '🍚';
+                let typeText = '밥주기';
+
+                if (log.type === '물주기') {
+                    icon = '🥛';
+                    typeText = '물 주기';
+                } else if (log.type === '화장실청소') {
+                    icon = '🧹';
+                    typeText = '화장실';
+                }
+
+                const userTag = log.userName === '다혜' 
+                    ? '<span class="text-[10px] text-rose-600 font-semibold bg-rose-50 px-1.5 py-0.5 rounded">다혜</span>'
+                    : '<span class="text-[10px] text-sky-600 font-semibold bg-sky-50 px-1.5 py-0.5 rounded">대준</span>';
+
+                return `
+                    <div class="p-3 bg-slate-50 hover:bg-slate-100/80 rounded-xl border border-slate-200/60 transition-colors flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <span class="text-lg flex-shrink-0">${icon}</span>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-bold text-xs text-slate-800 truncate">${typeText}</span>
+                                    ${userTag}
+                                </div>
+                                <div class="text-[11px] text-slate-400 mt-0.5 flex items-center gap-1">
+                                    <span>${formatFullDateTime(log.timestamp)}</span>
+                                    <span class="text-[10px] text-slate-500 font-medium">(${formatTimeAgo(log.timestamp)})</span>
+                                </div>
+                                ${log.note ? `<div class="text-[11px] text-slate-600 mt-0.5 truncate">💬 ${escapeHtml(log.note)}</div>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Direct Action Buttons: Clear Delete & Edit -->
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                            <button onclick="openEditModal('${log.id}')" class="px-2 py-1 text-[11px] font-medium text-slate-500 hover:text-slate-800 bg-white border border-slate-200 rounded-lg shadow-2xs">
+                                수정
+                            </button>
+                            <button onclick="openDeleteModal('${log.id}')" class="px-2 py-1 text-[11px] font-medium text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200/60 rounded-lg shadow-2xs">
+                                삭제
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+
+        function openEditModal(logId) {
+            const log = window.state.logs.find(l => l.id === logId);
+            if (!log) return;
+
+            document.getElementById('edit-id').value = log.id;
+            document.getElementById('edit-type').value = log.type;
+            
+            const userRadios = document.getElementsByName('edit-user');
+            for (let radio of userRadios) {
+                if (radio.value === log.userName) {
+                    radio.checked = true;
+                }
+            }
+
+            document.getElementById('edit-datetime').value = toDatetimeLocalString(log.timestamp);
+            document.getElementById('edit-note').value = log.note || '';
+
+            document.getElementById('edit-modal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-modal').classList.add('hidden');
+        }
+
+        function handleSaveEdit(event) {
+            event.preventDefault();
+            const id = document.getElementById('edit-id').value;
+            const type = document.getElementById('edit-type').value;
+            
+            let userName = '다혜';
+            const userRadios = document.getElementsByName('edit-user');
+            for (let radio of userRadios) {
+                if (radio.checked) userName = radio.value;
+            }
+
+            const datetimeVal = document.getElementById('edit-datetime').value;
+            const timestamp = datetimeVal ? new Date(datetimeVal).getTime() : new Date().getTime();
+            const note = document.getElementById('edit-note').value.trim();
+
+            window.updateCareLog(id, {
+                type: type,
+                userName: userName,
+                timestamp: timestamp,
+                dateStr: new Date(timestamp).toISOString(),
+                note: note
+            });
+
+            closeEditModal();
+        }
+
+        function openDeleteModal(logId) {
+            document.getElementById('delete-id').value = logId;
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+        }
+
+        function confirmDeleteLog() {
+            const id = document.getElementById('delete-id').value;
+            if (id) {
+                window.deleteCareLog(id);
+            }
+            closeDeleteModal();
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+
+            let bgClass = 'bg-slate-800 text-white';
+            let icon = '<i class="fa-solid fa-check text-emerald-400"></i>';
+
+            if (type === 'error') {
+                bgClass = 'bg-rose-600 text-white';
+                icon = '<i class="fa-solid fa-xmark text-white"></i>';
+            }
+
+            toast.className = `${bgClass} shadow-md rounded-xl px-3.5 py-2 text-xs font-medium flex items-center gap-2 transition-all duration-200 transform translate-y-3 opacity-0 pointer-events-auto`;
+            toast.innerHTML = `${icon} <span>${escapeHtml(message)}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-3', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 200);
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
